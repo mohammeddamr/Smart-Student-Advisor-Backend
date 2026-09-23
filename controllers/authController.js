@@ -57,5 +57,14 @@ export const login=async(req,res)=>{
         console.error("Login failed:", error);
         return res.status(500).json({message:"Could not login, please try again later"})    
 
-    }}
+}}
 
+export const getProfile=async(req,res)=>{
+    return res.status(200).json({student:{
+        id:req.user._id,
+        firstName:req.user.firstName,
+        lastName:req.user.lastName,
+        email:req.user.email,
+        studentId:req.user.studentId
+    }})
+}
