@@ -1,4 +1,4 @@
-import {registerStudent} from "../services/authService.js";
+import {registerStudent,loginStudent} from "../services/authService.js";
 
 
 export const signup =async(req,res)=>{
@@ -37,3 +37,25 @@ export const signup =async(req,res)=>{
     });
     }
 }
+
+export const login=async(req,res)=>{
+    try {const{email,password}=req.body??{}
+        if(typeof(email)!=="string" || !email.trim()|| typeof(password)!=="string" ||password.length<8||Buffer.byteLength(password, "utf8") > 72){  
+            return res.status(400).json({message:"Email and password are required and must be valid"})
+        }
+
+        const result=await loginStudent({email: email.toLowerCase().trim(),password})
+
+        if(!result){
+            return res.status(401).json({message:"Invalid email or password"})
+        }
+
+        return res.status(200).json({message:"Login successful",...result}
+
+        )}
+    catch(error){
+        console.error("Login failed:", error);
+        return res.status(500).json({message:"Could not login, please try again later"})    
+
+    }}
+

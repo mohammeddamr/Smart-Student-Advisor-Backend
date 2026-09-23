@@ -44,5 +44,9 @@ studentSchema.pre("save",async function(){
     this.password=await bcrypt.hash(this.password,12)
 })
 
+studentSchema.methods.comparePassword=async function(password){
+    return bcrypt.compare(password,this.password)
+}
+
 const Student=mongoose.model("Student",studentSchema)
 export default Student;
