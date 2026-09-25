@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
-import Student from "../models/studentModel.js" 
+import {getUserModel} from "../utils/getUserModel.js" 
 
 export const protectRoute=async(req,res,next)=>{
     try{
@@ -22,12 +22,18 @@ export const protectRoute=async(req,res,next)=>{
         if(!mongoose.isObjectIdOrHexString(decoded.userId))
             return res.status(401).json({status:"fail",message:"invalid access token"})
 
-        const student=await Student.findById(decoded.userId).select("-password")
+        const User=  getUserModel(decoded.role)
 
-        if(!student)
-            return res.status(401).json({status:"fail",message:"user not found"})
+        if(!User){
+            return res.status(401).json({message:"invalid access token"})
+        }
 
-        req.user=student
+        const user=await User.findById(decoded.userId).select("-password")
+
+        if(!user || !user.isActive)
+            return res.status(401).json({status:"fail",message:"user not avilable"})
+
+        req.user=user
 
     }catch(error){
         if (error.name === "TokenExpiredError") {

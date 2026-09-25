@@ -1,4 +1,4 @@
-import {registerStudent,loginStudent} from "../services/authService.js";
+import {registerStudent,loginUser} from "../services/authService.js";
 
 
 export const signup =async(req,res)=>{
@@ -39,12 +39,23 @@ export const signup =async(req,res)=>{
 }
 
 export const login=async(req,res)=>{
-    try {const{email,password}=req.body??{}
-        if(typeof(email)!=="string" || !email.trim()|| typeof(password)!=="string" ||password.length<8||Buffer.byteLength(password, "utf8") > 72){  
-            return res.status(400).json({message:"Email and password are required and must be valid"})
+    try {
+        const{email,password,role}=req.body??{}
+
+        if(typeof(role)!=="string")
+            return res.status(400).json({message:"Role is required and must be a string"})
+
+        const normalizedRole=role.toLowerCase().trim()
+        const allowedRoles=["student","professor","admin"]
+
+        if(typeof(email)!=="string" || !email.trim() || !allowedRoles.includes(normalizedRole)|| typeof(password)!=="string" ||password.length<8||Buffer.byteLength(password, "utf8") > 72){  
+            return res.status(400).json({message:"Email and password and role are required and must be valid"})
         }
 
-        const result=await loginStudent({email: email.toLowerCase().trim(),password})
+
+
+
+        const result=await loginUser({email: email.toLowerCase().trim(),password,role:normalizedRole})
 
         if(!result){
             return res.status(401).json({message:"Invalid email or password"})
@@ -60,11 +71,12 @@ export const login=async(req,res)=>{
 }}
 
 export const getProfile=async(req,res)=>{
-    return res.status(200).json({student:{
+    return res.status(200).json({user:{
         id:req.user._id,
         firstName:req.user.firstName,
         lastName:req.user.lastName,
         email:req.user.email,
-        studentId:req.user.studentId
+        role:req.user.role,
+        
     }})
 }
