@@ -1,61 +1,55 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
+import mongoose from "mongoose"
+import bcrypt from "bcryptjs"
 
-const studentSchema=new mongoose.Schema({
+const adminSchema=new mongoose.Schema({
     firstName:{
         type:String,
+        trim:true,
         required:true,
-        trim:true
     },
     lastName:{
         type:String,
+        trim:true,
         required:true,
-        trim:true
     },
     email:{
         type:String,
-        required:true,
         trim:true,
+        required:true,
+        lowercase:true,
         unique:true,
-        lowercase:true
-    },
-    studentId:{
-        type:String,
-        required:true,
-        trim:true,
-        unique:true
     },
     password:{
         type:String,
         required:true,
+        select:false,
         minlength:8,
-        select:false
     },
     role:{
         type:String,
-        enum:["student"],
-        default:"student"
+        enum:["admin","superadmin"],
+        default:"admin"
     },
     isActive:{
         type:Boolean,
         default:true
     }
-
 },{timestamps:true})
 
-studentSchema.pre("save",async function(){
+adminSchema.pre("save",async function(){
     if(!this.isModified("password"))
         return;
 
-    if (Buffer.byteLength(this.password, "utf8") > 72) {
+    if(Buffer.byteLength(this.password,"utf8")>72){
         throw new Error("Password must not exceed 72 bytes");
     }
     this.password=await bcrypt.hash(this.password,12)
 })
 
-studentSchema.methods.comparePassword=async function(password){
+adminSchema.methods.comparePassword=async function (password){
     return bcrypt.compare(password,this.password)
 }
 
-const Student=mongoose.model("Student",studentSchema)
-export default Student;
+
+const Admin=mongoose.model("Admin",adminSchema)
+export default Admin
